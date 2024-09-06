@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Fresher Count by Center</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<style>
+    .chart-container {
+        display: flex;
+        justify-content: center; /* Căn giữa theo chiều ngang */
+        align-items: center;     /* Căn giữa theo chiều dọc */
+        height: 70vh;           /* Chiều cao toàn màn hình */
+    }
+
+    /* Kích thước tối đa cho biểu đồ */
+    #centerChart {
+        max-width: 800px;  /* Giới hạn chiều rộng */
+        max-height: 500px; /* Giới hạn chiều cao */
+        width: 100%;       /* Đảm bảo biểu đồ chiếm hết chiều rộng khung chứa */
+        height: auto;      /* Chiều cao tự động điều chỉnh theo tỉ lệ */
+    }
+</style>
+<h1>Fresher Count by Center</h1>
+<div class="chart-container">
+  <canvas id="centerChart"></canvas>
+</div>
+
+<script th:inline = "javascript">
+        const centerData = /*[[${centerData}]]*/ {};
+        const centerLabels = Object.keys(centerData);
+        const centerCounts = Object.values(centerData);
+
+        new Chart(document.getElementById('centerChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: centerLabels,
+                datasets: [{
+                    label: 'Freshers by Center',
+                    data: centerCounts,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            option:{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    y: {
+                        beginAtZero: true
+                    }
+            }
+        });
+    </script>
+</body>
+</html>

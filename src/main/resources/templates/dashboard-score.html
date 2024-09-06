@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Fresher Count by Score</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<style>
+    .chart-container {
+        display: flex;
+        justify-content: center; /* Căn giữa theo chiều ngang */
+        align-items: center;     /* Căn giữa theo chiều dọc */
+        height: 70vh;           /* Chiều cao toàn màn hình */
+    }
+
+    /* Kích thước tối đa cho biểu đồ */
+    #scoreChart {
+        max-width: 800px;  /* Giới hạn chiều rộng */
+        max-height: 500px; /* Giới hạn chiều cao */
+        width: 100%;       /* Đảm bảo biểu đồ chiếm hết chiều rộng khung chứa */
+        height: auto;      /* Chiều cao tự động điều chỉnh theo tỉ lệ */
+    }
+</style>
+<h1>Fresher Count by Score</h1>
+<div class="chart-container">
+  <canvas id="scoreChart"></canvas>
+</div>
+
+<script th:inline = "javascript">
+        const scoreData = /*[[${scoreData}]]*/ {};
+        const scoreLabels = Object.keys(scoreData);
+        const scoreCounts = Object.values(scoreData);
+
+        new Chart(document.getElementById('scoreChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: scoreLabels,
+                datasets: [{
+                    label: 'Freshers by Score',
+                    data: scoreCounts,
+                    backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                    borderColor: 'rgba(153, 102, 255, 1)',
+                    borderWidth: 1
+                }]
+                },
+                option:{
+                    responsive: true,
+                    maintainAspectRatio: false,  // Điều chỉnh tỉ lệ khi thay đổi kích thước
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+        });
+    </script>
+</body>
+</html>
