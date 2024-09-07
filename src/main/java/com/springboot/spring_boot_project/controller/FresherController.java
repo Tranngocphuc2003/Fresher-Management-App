@@ -100,8 +100,13 @@ public class FresherController {
         return fresherService.getFreshersByCenterId(centerId);
     }
     @PutMapping("/{fresherId}/center/{centerId}")
-    public Fresher addFresherToCenter(@PathVariable("fresherId") int fresherId, @PathVariable("centerId") int centerId){
-        return fresherService.addFresherToCenter(fresherId,centerId);
+    public ApiResponse<String> addFresherToCenter(@PathVariable("fresherId") int fresherId, @PathVariable("centerId") int centerId){
+        try {
+            fresherService.addFresherToCenter(fresherId, centerId);
+            return new ApiResponse<>(200,"Added fresher to center successfully", null);
+        } catch (AppException e){
+            return new ApiResponse<>(e.getErrorCode().getCode(),e.getErrorCode().getMessage(),null);
+        }
     }
 
 

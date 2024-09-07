@@ -30,6 +30,7 @@ public class Fresher {
     Set<String> programmingLanguage = new HashSet<>();
     @ManyToOne
     @JoinColumn(name = "center_id", referencedColumnName = "id")
+    @JsonIgnore
     Center center;
     @ManyToMany(mappedBy = "freshers", cascade =CascadeType.REMOVE)
     @JsonIgnore

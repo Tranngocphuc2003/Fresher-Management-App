@@ -23,5 +23,7 @@ public class Center {
     String name;
     @Column(name = "location")
     String location;
+    @OneToMany(mappedBy = "center", cascade = CascadeType.ALL,orphanRemoval = true)
+    private Set<Fresher> freshers;
 
 }

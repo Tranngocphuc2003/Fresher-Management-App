@@ -3,6 +3,7 @@ import com.springboot.spring_boot_project.dto.request.ApiResponse;
 import com.springboot.spring_boot_project.dto.request.CenterCreationRequest;
 import com.springboot.spring_boot_project.dto.request.CenterUpdateRequest;
 import com.springboot.spring_boot_project.entity.Center;
+import com.springboot.spring_boot_project.exception.AppException;
 import com.springboot.spring_boot_project.service.CenterService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -34,15 +35,19 @@ public class CenterController {
         return apiResponse;
     }
     @PutMapping("/{centerId}")
-    ApiResponse<Center> updateCenter(@PathVariable int centerId, @RequestBody CenterUpdateRequest request){
+    ApiResponse<Center> updateCenter(@PathVariable("centerId") int centerId, @RequestBody CenterUpdateRequest request){
         Center updateCenter = centerService.updateCenter(centerId, request);
         ApiResponse<Center> apiResponse = new ApiResponse<>(200, "Update center successfully", updateCenter);
         return apiResponse;
     }
     @DeleteMapping("/{centerId}")
-    ApiResponse<Void> deleteCenter(@PathVariable int centerId){
-        centerService.deleteCenter(centerId);
-        ApiResponse<Void> apiResponse = new ApiResponse<>(200, "Delete center successfully", null);
-        return apiResponse;
+    ApiResponse<Void> deleteCenter(@PathVariable("centerId") int centerId){
+        try{
+            centerService.deleteCenter(centerId);
+            ApiResponse<Void> apiResponse = new ApiResponse<>(200, "Delete center successfully", null);
+            return apiResponse;
+        }catch (AppException e){
+            return new ApiResponse<>(e.getErrorCode().getCode(), e.getErrorCode().getMessage(), null);
+        }
     }
 }

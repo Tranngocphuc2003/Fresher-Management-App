@@ -5,6 +5,7 @@ import com.springboot.spring_boot_project.entity.Center;
 import com.springboot.spring_boot_project.exception.AppException;
 import com.springboot.spring_boot_project.exception.ErrorCode;
 import com.springboot.spring_boot_project.repository.CenterRepository;
+import com.springboot.spring_boot_project.repository.FresherRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -17,6 +18,7 @@ import java.util.List;
 @Service
 public class CenterService {
     private CenterRepository centerRepository;
+    private FresherRepository fresherRepository;
     public Center createCenter(CenterCreationRequest request){
         Center center = new Center();
         if (centerRepository.existsByNameAndLocation(request.getName(), request.getLocation())){
@@ -41,6 +43,7 @@ public class CenterService {
     }
     public void deleteCenter(int centerId){
         Center center = centerRepository.findById(centerId).orElseThrow(()-> new AppException((ErrorCode.CENTER_NOT_FOUND)));
+        fresherRepository.clearCenterIdForFreshers(centerId);
         centerRepository.deleteById(centerId);
     }
 }
