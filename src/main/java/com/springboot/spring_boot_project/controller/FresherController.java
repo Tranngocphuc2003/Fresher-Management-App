@@ -5,6 +5,7 @@ import com.springboot.spring_boot_project.dto.request.FresherCreationRequest;
 import com.springboot.spring_boot_project.dto.request.FresherUpdateRequest;
 import com.springboot.spring_boot_project.entity.Fresher;
 import com.springboot.spring_boot_project.entity.Project;
+import com.springboot.spring_boot_project.exception.AppException;
 import com.springboot.spring_boot_project.service.FresherService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -38,9 +39,13 @@ public class FresherController {
     }
     @GetMapping("/{fresherId}")
     ApiResponse<Fresher> getFresherById(@PathVariable("fresherId") int fresherID){
-        Fresher getFresher = fresherService.getFresherById(fresherID);
-        ApiResponse<Fresher> apiResponse = new ApiResponse<>(200, "Get fresher successfully ", getFresher);
-        return apiResponse;
+        try {
+            Fresher getFresher = fresherService.getFresherById(fresherID);
+            ApiResponse<Fresher> apiResponse = new ApiResponse<>(200, "Get fresher successfully ", getFresher);
+            return apiResponse;
+        } catch (AppException e){
+            return new ApiResponse<>(e.getErrorCode().getCode(),e.getErrorCode().getMessage(),null);
+        }
     }
     @GetMapping("/name/{name}")
     public ApiResponse<List<Fresher>> getFresherByName(@PathVariable("name") String name){
@@ -76,10 +81,14 @@ public class FresherController {
     }
 
     @DeleteMapping("/{fresherId}")
-    ApiResponse<Void> deleteFresher(@PathVariable int fresherId){
-        fresherService.deleteFresher(fresherId);
-        ApiResponse<Void> apiResponse = new ApiResponse<>(200, "Delete fresher successfully", null);
-        return apiResponse;
+    ApiResponse<Void> deleteFresher(@PathVariable("fresherId") int fresherId){
+        try{
+            fresherService.deleteFresher(fresherId);
+            ApiResponse<Void> apiResponse = new ApiResponse<>(200, "Delete fresher successfully", null);
+            return apiResponse;
+        } catch (AppException e){
+            return new ApiResponse<>(e.getErrorCode().getCode(),e.getErrorCode().getMessage(), null);
+        }
     }
     @GetMapping("/{fresherId}/projects")
     public ApiResponse<Set<Project>> getFresherProjects(@PathVariable("fresherId") int fresherId){

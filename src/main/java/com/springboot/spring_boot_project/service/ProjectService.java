@@ -102,4 +102,7 @@ public class ProjectService {
 
         emailService.sendMail("tranngocphuc_t66@hus.edu.vn", "Project Notification", model, "email-template");
     }
+    public boolean isFresherInAnyProject(int fresherId){
+        return !projectRepository.findAllByFreshers_Id(fresherId).isEmpty();
+    }
 }

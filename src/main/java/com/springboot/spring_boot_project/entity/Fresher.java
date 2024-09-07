@@ -25,12 +25,16 @@ public class Fresher {
     String name;
     @Column(name = "email", nullable = false)
     String email;
-    @Column(name = "programmingLanguage",nullable = false)
-    String programmingLanguage;
+    @Column(name = "programmingLanguage")
+    @ElementCollection
+    Set<String> programmingLanguage = new HashSet<>();
     @ManyToOne
-    @JoinColumn(name = "center_id", nullable = true,referencedColumnName = "id")
+    @JoinColumn(name = "center_id", referencedColumnName = "id")
     Center center;
-    @ManyToMany(mappedBy = "freshers")
+    @ManyToMany(mappedBy = "freshers", cascade =CascadeType.REMOVE)
     @JsonIgnore
     Set<Project> projects = new HashSet<>();
+    @OneToOne(mappedBy = "fresher", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @JsonIgnore
+    Assignment assignment;
 }

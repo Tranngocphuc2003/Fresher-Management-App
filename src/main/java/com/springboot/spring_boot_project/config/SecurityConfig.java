@@ -46,9 +46,7 @@ public class SecurityConfig {
 
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(req ->req
-                        .requestMatchers(HttpMethod.POST,PUBLIC_POST_ENDPOINTS).permitAll()
-                      .requestMatchers(HttpMethod.PUT,PUBLIC_PUT_ENDPOINTS).permitAll()
-                      .requestMatchers(HttpMethod.GET,PUBLIC_GET_ENDPOINTS).permitAll()
+                        .requestMatchers("/user","/fresher/**","/center/**", "/project/**","/assignment/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**","/swagger-ui.html").permitAll()
                         .anyRequest().authenticated() // Protect all other endpoint
                 )

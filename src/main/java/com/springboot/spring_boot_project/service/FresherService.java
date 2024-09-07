@@ -1,5 +1,6 @@
 package com.springboot.spring_boot_project.service;
 
+import com.springboot.spring_boot_project.dto.request.ApiResponse;
 import com.springboot.spring_boot_project.dto.request.FresherCreationRequest;
 import com.springboot.spring_boot_project.dto.request.FresherUpdateRequest;
 import com.springboot.spring_boot_project.entity.Center;
@@ -30,6 +31,7 @@ public class FresherService {
     private CenterRepository centerRepository;
 
     private ProjectRepository projectRepository;
+    private ProjectService projectService;
     public Fresher createFresher(FresherCreationRequest request){
         Fresher fr = new Fresher();
         fr.setName(request.getName());
@@ -62,6 +64,11 @@ public class FresherService {
     }
     public void deleteFresher(int fresherId){
         Fresher fresher = getFresherById(fresherId);
+        if (projectService.isFresherInAnyProject(fresherId)) {
+            throw new AppException(ErrorCode.FRESHER_STILL_IN_PROJECT);
+        }
+        fresher.getProjects().clear();
+        assignmentRepository.deleteByFresherId(fresherId);
         fresherRepository.delete(fresher);
     }
     public Set<Project> getProjectsByFresherId(int fresherId){

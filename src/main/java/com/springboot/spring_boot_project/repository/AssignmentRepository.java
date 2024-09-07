@@ -1,8 +1,10 @@
 package com.springboot.spring_boot_project.repository;
 import com.springboot.spring_boot_project.entity.Assignment;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -28,4 +30,9 @@ public interface AssignmentRepository extends JpaRepository<Assignment, Integer>
             "ELSE 'Below 50' " +
             "END")
     List<Object[]> countFresherByScore();
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM Assignment a WHERE a.fresher.id = :fresherId")
+    void deleteByFresherId(int fresherId);
 }

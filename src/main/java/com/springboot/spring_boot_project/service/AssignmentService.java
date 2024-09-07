@@ -47,7 +47,12 @@ public class AssignmentService {
         if (!fresherRepository.existsById(fresherId)){
             throw new AppException(ErrorCode.FRESHER_NOT_EXISTED);
         }
-        return assignmentRepository.findByFresherId(fresherId);
+        Assignment assignment = assignmentRepository.findByFresherId(fresherId);
+
+        if(assignment == null){
+            throw new AppException(ErrorCode.SCORE_NOT_FOUND);
+        }
+        return assignment;
     }
     public Assignment updateAssignment(AssignmentUpdateRequest request, int fresherId){
         Assignment assignment = getScoreByFresherId(fresherId);
