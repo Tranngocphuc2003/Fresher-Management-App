@@ -20,7 +20,7 @@ import java.util.Set;
 public class Fresher {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    long id;
+    Long id;
     @Column(name = "name", nullable = false)
     String name;
     @Column(name = "email", nullable = false)
@@ -32,10 +32,11 @@ public class Fresher {
     @JoinColumn(name = "center_id", referencedColumnName = "id")
     @JsonIgnore
     Center center;
-    @ManyToMany(mappedBy = "freshers", cascade =CascadeType.REMOVE)
-    @JsonIgnore
-    Set<Project> projects = new HashSet<>();
     @OneToOne(mappedBy = "fresher", cascade = CascadeType.REMOVE, orphanRemoval = true)
     @JsonIgnore
     Assignment assignment;
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @JsonIgnore
+    private UserInfo user;
 }

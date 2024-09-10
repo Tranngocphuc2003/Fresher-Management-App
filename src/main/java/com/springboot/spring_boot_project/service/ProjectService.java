@@ -3,17 +3,21 @@ import com.springboot.spring_boot_project.dto.request.ProjectCreationRequest;
 import com.springboot.spring_boot_project.dto.request.ProjectUpdateRequest;
 import com.springboot.spring_boot_project.entity.Center;
 import com.springboot.spring_boot_project.entity.Fresher;
+import com.springboot.spring_boot_project.entity.FresherProject;
 import com.springboot.spring_boot_project.entity.Project;
 import com.springboot.spring_boot_project.exception.AppException;
 import com.springboot.spring_boot_project.exception.ErrorCode;
 import com.springboot.spring_boot_project.repository.CenterRepository;
+import com.springboot.spring_boot_project.repository.FresherProjectRepository;
 import com.springboot.spring_boot_project.repository.FresherRepository;
 import com.springboot.spring_boot_project.repository.ProjectRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
+
 
 
 import java.util.HashMap;
@@ -28,6 +32,8 @@ public class ProjectService {
     private FresherRepository fresherRepository;
     private EmailService emailService;
     private CenterRepository centerRepository;
+    private FresherProjectRepository fresherProjectRepository;
+    private static final Logger logger = LoggerFactory.getLogger(ProjectService.class);
     public Project createProject(ProjectCreationRequest request){
         Project prj = new Project();
         prj.setName(request.getName());
@@ -70,11 +76,13 @@ public class ProjectService {
                 .orElseThrow(()-> new AppException(ErrorCode.PROJECT_NOT_FOUND));
         Fresher fresher = fresherRepository.findById(fresherId)
                 .orElseThrow(()->new AppException(ErrorCode.FRESHER_NOT_EXISTED));
-        project.getFreshers().add(fresher);
-        fresher.getProjects().add(project);
 
-        projectRepository.save(project);
-        fresherRepository.save(fresher);
+        FresherProject fresherProject = new FresherProject();
+        fresherProject.setFresher(fresher);
+        fresherProject.setProject(project);
+        fresherProject.setStatus("active");
+        fresherProjectRepository.save(fresherProject);
+
         Map<String, Object> model = new HashMap<>();
         model.put("name", fresher.getName());
         model.put("action", "added");
@@ -84,25 +92,38 @@ public class ProjectService {
 
         emailService.sendMail("tranngocphuc_t66@hus.edu.vn", "Project Notification", model, "email-template");
     }
-    public void removeFresherToProject(int projectId, int fresherId){
+
+    public void removeFresherFromProject(int projectId, int fresherId){
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(()-> new AppException(ErrorCode.PROJECT_NOT_FOUND));
         Fresher fresher = fresherRepository.findById(fresherId)
                 .orElseThrow(()->new AppException(ErrorCode.FRESHER_NOT_EXISTED));
+        System.out.println("Project: " + project);
+        System.out.println("Fresher: " + fresher);
 
-        project.getFreshers().remove(fresher);
-        projectRepository.save(project);
+        FresherProject fresherProject = fresherProjectRepository.findByFresherAndProject(fresher,project);
+        System.out.println("FresherProject: {}"+ fresherProject);
+        if(fresherProject != null){
 
-        Map<String, Object> model = new HashMap<>();
-        model.put("name", fresher.getName());
-        model.put("action", "removed");
-        model.put("projectName", project.getName());
-        model.put("managerName", project.getManager());
+            fresherProject.setStatus("removed");
+            fresherProjectRepository.save(fresherProject);
+            Map<String, Object> model = new HashMap<>();
+            model.put("name", fresher.getName());
+            model.put("action", "removed");
+            model.put("projectName", project.getName());
+            model.put("managerName", project.getManager());
 
+            emailService.sendMail("tranngocphuc_t66@hus.edu.vn", "Project Notification", model, "email-template");
 
-        emailService.sendMail("tranngocphuc_t66@hus.edu.vn", "Project Notification", model, "email-template");
-    }
+        }else {
+            throw new AppException(ErrorCode.FRESHER_PROJECT_NOT_FOUND);
+        }
+//        if(fresherProject != null){
+//            throw new AppException(ErrorCode.FRESHER_PROJECT_NOT_FOUND);
+//        }
+
+   }
     public boolean isFresherInAnyProject(int fresherId){
-        return !projectRepository.findAllByFreshers_Id(fresherId).isEmpty();
+        return fresherProjectRepository.existsByFresherIdAndStatus(fresherId, "active");
     }
 }

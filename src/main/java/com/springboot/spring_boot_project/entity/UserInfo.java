@@ -28,5 +28,8 @@ public class UserInfo {
     String password;
     @Column(name = "role")
     Set<String> roles;
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Fresher fresher;
+
 
 }

@@ -3,6 +3,7 @@ package com.springboot.spring_boot_project.controller;
 import com.springboot.spring_boot_project.dto.request.*;
 import com.springboot.spring_boot_project.dto.response.AuthenticationResponse;
 import com.springboot.spring_boot_project.dto.response.IntrospectResponse;
+import com.springboot.spring_boot_project.exception.AppException;
 import com.springboot.spring_boot_project.service.AuthenticationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,10 +24,14 @@ public class AuthenticationController {
     public ApiResponse<AuthenticationResponse> login(
             @RequestBody AuthenticationRequest request
     ){
-        var result = authService.login(request);
-        return ApiResponse.<AuthenticationResponse>builder()
-                .result(result)
-                .build();
+        try {
+            var result = authService.login(request);
+            return ApiResponse.<AuthenticationResponse>builder()
+                    .result(result)
+                    .build();
+        } catch (AppException e){
+            return new ApiResponse<>(e.getErrorCode().getCode(), e.getErrorCode().getMessage(), null);
+        }
     }
     @PostMapping("/introspect")
     public ApiResponse<IntrospectResponse> introspect(
@@ -49,10 +54,14 @@ public class AuthenticationController {
     public ApiResponse<AuthenticationResponse> refresh(
             @RequestBody RefreshRequest request
     ){
-        var result = authService.refreshToken(request);
+        try {
+            var result = authService.refreshToken(request);
 
-        return ApiResponse.<AuthenticationResponse>builder()
-                .result(result)
-                .build();
+            return ApiResponse.<AuthenticationResponse>builder()
+                    .result(result)
+                    .build();
+        } catch (AppException e){
+            return new ApiResponse<>(e.getErrorCode().getCode(), e.getErrorCode().getMessage(), null);
+        }
     }
 }

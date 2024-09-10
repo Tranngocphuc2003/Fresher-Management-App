@@ -3,18 +3,14 @@ package com.springboot.spring_boot_project.service;
 import com.springboot.spring_boot_project.dto.request.ApiResponse;
 import com.springboot.spring_boot_project.dto.request.FresherCreationRequest;
 import com.springboot.spring_boot_project.dto.request.FresherUpdateRequest;
-import com.springboot.spring_boot_project.entity.Center;
-import com.springboot.spring_boot_project.entity.Fresher;
-import com.springboot.spring_boot_project.entity.Project;
+import com.springboot.spring_boot_project.entity.*;
 import com.springboot.spring_boot_project.exception.AppException;
 import com.springboot.spring_boot_project.exception.ErrorCode;
-import com.springboot.spring_boot_project.repository.AssignmentRepository;
-import com.springboot.spring_boot_project.repository.CenterRepository;
-import com.springboot.spring_boot_project.repository.FresherRepository;
-import com.springboot.spring_boot_project.repository.ProjectRepository;
+import com.springboot.spring_boot_project.repository.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -23,20 +19,24 @@ import java.util.stream.Collectors;
 @FieldDefaults(level = AccessLevel.PRIVATE,makeFinal = true)
 @Service
 public class FresherService {
-
+    private UserInfoRepository userInfoRepository;
     private FresherRepository fresherRepository;
 
     private AssignmentRepository assignmentRepository;
 
     private CenterRepository centerRepository;
 
-    private ProjectRepository projectRepository;
+    private FresherProjectRepository fresherProjectRepository;
     private ProjectService projectService;
     public Fresher createFresher(FresherCreationRequest request){
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserInfo userInfo = userInfoRepository.findByName(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         Fresher fr = new Fresher();
         fr.setName(request.getName());
         fr.setEmail(request.getEmail());
         fr.setProgrammingLanguage(request.getProgramming_language());
+        fr.setUser(userInfo);
         return fresherRepository.save(fr);
     }
     public List<Fresher> getFreshers(){
@@ -67,14 +67,14 @@ public class FresherService {
         if (projectService.isFresherInAnyProject(fresherId)) {
             throw new AppException(ErrorCode.FRESHER_STILL_IN_PROJECT);
         }
-        fresher.getProjects().clear();
+        fresherProjectRepository.deleteByFresherId(fresherId);
         assignmentRepository.deleteByFresherId(fresherId);
         fresherRepository.delete(fresher);
     }
-    public Set<Project> getProjectsByFresherId(int fresherId){
+    public List<FresherProject> getProjectsByFresherId(int fresherId){
         Fresher fresher = fresherRepository.findById(fresherId)
                 .orElseThrow(()-> new AppException(ErrorCode.FRESHER_NOT_EXISTED));
-        return fresher.getProjects();
+        return fresherProjectRepository.findByFresher(fresher);
     }
     public Fresher addFresherToCenter(int fresherId, int centerId){
         Fresher fresher = fresherRepository.findById(fresherId)

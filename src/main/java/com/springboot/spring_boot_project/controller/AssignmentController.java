@@ -8,6 +8,7 @@ import com.springboot.spring_boot_project.exception.AppException;
 import com.springboot.spring_boot_project.service.AssignmentService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,18 +21,25 @@ import java.util.List;
 public class AssignmentController {
     @Autowired
     private AssignmentService assignmentService;
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping
     ApiResponse<Assignment> createAssignment(@RequestBody @Valid AssignmentCreationRequest request){
-        Assignment createAssignment = assignmentService.createAssignment(request);
-        ApiResponse<Assignment> apiResponse = new ApiResponse<>(200,"Add score successfully",createAssignment);
-        return apiResponse;
+        try {
+            Assignment createAssignment = assignmentService.createAssignment(request);
+            ApiResponse<Assignment> apiResponse = new ApiResponse<>(200, "Add score successfully", createAssignment);
+            return apiResponse;
+        }catch (AppException e){
+            return new ApiResponse<>(e.getErrorCode().getCode(), e.getErrorCode().getMessage(), null);
+        }
     }
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
     @GetMapping
     ApiResponse<List<Assignment>> getAllAssignment(){
         List<Assignment> getAssignments = assignmentService.getAllScore();
         ApiResponse<List<Assignment>> apiResponse = new ApiResponse<>(200, "Get all score successfully", getAssignments);
         return apiResponse;
     }
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
     @GetMapping("/fresher/{id}")
     ApiResponse<Assignment> getScoreByFresherId(@PathVariable("id") int fresherId){
         try {
@@ -41,12 +49,15 @@ public class AssignmentController {
             return new ApiResponse<>(e.getErrorCode().getCode(), e.getErrorCode().getMessage(), null);
         }
     }
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/fresher/{fresherId}")
     ApiResponse<Assignment> updateScore(@RequestBody @Valid AssignmentUpdateRequest request, @PathVariable("fresherId") int fresherId){
-        Assignment updateAssignment = assignmentService.updateAssignment(request, fresherId);
-        ApiResponse<Assignment> apiResponse = new ApiResponse<>(200, "Update score successfully",updateAssignment);
-        return apiResponse;
+        try {
+            Assignment updateAssignment = assignmentService.updateAssignment(request, fresherId);
+            ApiResponse<Assignment> apiResponse = new ApiResponse<>(200, "Update score successfully", updateAssignment);
+            return apiResponse;
+        } catch (AppException e){
+            return new ApiResponse<>(e.getErrorCode().getCode(), e.getErrorCode().getMessage(), null);
+        }
     }
-
-
 }

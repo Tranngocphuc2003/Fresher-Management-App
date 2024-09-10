@@ -42,15 +42,8 @@ public class Project {
 
     @ManyToOne
     @JoinColumn(name = "center_id", nullable = false, referencedColumnName = "id")
+    @JsonIgnore
     Center center;
 
-    @ManyToMany
-    @JsonIgnore
-    @JoinTable(
-            name = "fresher_project",
-            joinColumns = @JoinColumn(name = "project_id"),
-            inverseJoinColumns = @JoinColumn(name = "fresher_id")
-    )
-    Set<Fresher> freshers = new HashSet<>();
 
 }

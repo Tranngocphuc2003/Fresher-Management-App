@@ -19,7 +19,8 @@ public enum ErrorCode {
     FRESHER_NOT_EXISTED(1007, "Fresher not existed",HttpStatus.NOT_FOUND),
     UNAUTHORIZED(1008, "You do not have permission",HttpStatus.FORBIDDEN),
     FRESHER_STILL_IN_PROJECT(1009, "Admin needs to remove the Fresher from all projects before deletion.",HttpStatus.BAD_REQUEST),
-    SCORE_NOT_FOUND(1010, "Score not found", HttpStatus.NOT_FOUND);
+    SCORE_NOT_FOUND(1010, "Score not found", HttpStatus.NOT_FOUND),
+    FRESHER_PROJECT_NOT_FOUND(1011, "FresherProject relationship not found", HttpStatus.NOT_FOUND);
 
     private int code;
     private String message;

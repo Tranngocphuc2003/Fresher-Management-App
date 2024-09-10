@@ -14,7 +14,7 @@ public class UserInfoDetails implements UserDetails {
     private String username; // Changed from 'name' to 'username' for clarity
     private String password;
     private List<GrantedAuthority> authorities;
-
+    private final Long fresherId;
     public UserInfoDetails(UserInfo userInfo) {
         this.username = userInfo.getName(); // Assuming 'name' is used as 'username'
         this.password = userInfo.getPassword();
@@ -22,6 +22,7 @@ public class UserInfoDetails implements UserDetails {
                 .stream()
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
+        this.fresherId = userInfo.getFresher() != null ? userInfo.getFresher().getId() : null;
     }
 
     @Override
@@ -58,4 +59,22 @@ public class UserInfoDetails implements UserDetails {
     public boolean isEnabled() {
         return true; // Implement your logic if you need this
     }
+    public Long getFresherId() {
+        return fresherId;
+    }
+
+    // Override equals() and hashCode() for proper comparison and collection behavior
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UserInfoDetails that = (UserInfoDetails) o;
+        return username.equals(that.username);
+    }
+
+    @Override
+    public int hashCode() {
+        return username.hashCode();
+    }
 }
+

@@ -25,10 +25,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
-    private final String[] PUBLIC_POST_ENDPOINTS = {"/user","/fresher","/center", "/project/**","/assignment",
-            "/auth/login/**","/auth/introspect","/auth/logout","/auth/refresh"};
-    private final String[] PUBLIC_GET_ENDPOINTS = {"/fresher/**","/center", "/project/**","/assignment/**","/dashboard/**"};
-    private final String[] PUBLIC_PUT_ENDPOINTS = {"/fresher/**","/center", "/project","/assignment/**"};
+
     @Autowired
     private JwtAuthFilter authFilter;
     @Lazy
@@ -46,8 +43,8 @@ public class SecurityConfig {
 
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(req ->req
-                        .requestMatchers("/user","/fresher/**","/center/**", "/project/**","/assignment/**","/dashboard/**").permitAll()
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**","/swagger-ui.html").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**","/swagger-ui.html",
+                                "/auth/**","/dashboard/**").permitAll()
                         .anyRequest().authenticated() // Protect all other endpoint
                 )
 

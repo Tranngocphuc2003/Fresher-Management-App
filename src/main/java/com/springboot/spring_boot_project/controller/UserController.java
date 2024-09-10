@@ -6,6 +6,7 @@ import com.springboot.spring_boot_project.service.UserInfoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +19,7 @@ import java.util.List;
 public class UserController {
     @Autowired
     private UserInfoService userInfoService;
-
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping
     ApiResponse<UserResponse> createUserInfo(@RequestBody UserInfoCreationRequest request){
         return ApiResponse.<UserResponse>builder()
@@ -37,9 +38,9 @@ public class UserController {
                 .code(200)
                 .message("Get all user successfully")
                 .result(userInfoService.getAllUserInfo())
-                .build()
-                ;
+                .build();
     }
+
     @GetMapping("/{userId}")
     ApiResponse<UserResponse> getUserInfo(@PathVariable("userId") String userID){
         return ApiResponse.<UserResponse>builder()
@@ -48,6 +49,7 @@ public class UserController {
                 .result(userInfoService.getUserInfo(userID))
                 .build();
     }
+    @PreAuthorize("hasAuthority('ADMIN') or  #userId == authentication.principal.id")
      @PutMapping("/{userId}")
     ApiResponse<UserResponse> updateUserInfo(@PathVariable String userId, @RequestBody UserInfoUpdateRequest request){
        return ApiResponse.<UserResponse>builder()
@@ -56,6 +58,7 @@ public class UserController {
                .result(userInfoService.updateUserInfo(userId,request))
                .build();
     }
+    @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping("/{userId}")
     ApiResponse<String> deleteUserInfo(@PathVariable String userId){
         userInfoService.deleteUserInfo(userId);
@@ -64,6 +67,7 @@ public class UserController {
                 .message("User has been deleted")
                 .build();
     }
+    @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
     @GetMapping("/myInfo")
     ApiResponse<UserResponse> getMyInfo(){
         return ApiResponse.<UserResponse>builder()

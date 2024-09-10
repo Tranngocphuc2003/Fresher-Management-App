@@ -4,10 +4,12 @@ import com.springboot.spring_boot_project.dto.request.ApiResponse;
 import com.springboot.spring_boot_project.dto.request.FresherCreationRequest;
 import com.springboot.spring_boot_project.dto.request.FresherUpdateRequest;
 import com.springboot.spring_boot_project.entity.Fresher;
+import com.springboot.spring_boot_project.entity.FresherProject;
 import com.springboot.spring_boot_project.entity.Project;
 import com.springboot.spring_boot_project.exception.AppException;
 import com.springboot.spring_boot_project.service.FresherService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -17,13 +19,14 @@ import java.util.*;
 public class FresherController {
     @Autowired
     private FresherService fresherService;
-
+    @PreAuthorize("hasAuthority('USER')")
     @PostMapping
     ApiResponse<Fresher> createFresher(@RequestBody FresherCreationRequest request){
         Fresher createFresher = fresherService.createFresher(request);
         ApiResponse<Fresher> apiResponse = new ApiResponse<>(200, "Create fresher successfully", createFresher);
         return apiResponse;
     }
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping
     ApiResponse<Map<String,Object>> getFreshers(){
         List<Fresher> getFreshers =  fresherService.getFreshers();
@@ -37,6 +40,7 @@ public class FresherController {
         ApiResponse<Map<String,Object>> apiResponse = new ApiResponse<>(200, "Get all freshers successfully", response);
         return apiResponse;
     }
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping("/{fresherId}")
     ApiResponse<Fresher> getFresherById(@PathVariable("fresherId") int fresherID){
         try {
@@ -47,6 +51,7 @@ public class FresherController {
             return new ApiResponse<>(e.getErrorCode().getCode(),e.getErrorCode().getMessage(),null);
         }
     }
+    @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
     @GetMapping("/name/{name}")
     public ApiResponse<List<Fresher>> getFresherByName(@PathVariable("name") String name){
         List<Fresher> freshers = fresherService.searchByName(name);
@@ -55,6 +60,7 @@ public class FresherController {
         }
         return new ApiResponse<>(200, "Fresher found", freshers);
     }
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
     @GetMapping("/email/{email}")
     public ApiResponse<List<Fresher>> getFresherByEmail(@PathVariable("email") String email){
         List<Fresher> freshers = fresherService.searchByEmail(email);
@@ -63,6 +69,7 @@ public class FresherController {
         }
         return new ApiResponse<>(200, "Fresher found", freshers);
     }
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
     @GetMapping("/programming_language/{programming_language}")
     public ApiResponse<List<Fresher>> getFresherByProgrammingLanguage(
             @PathVariable("programming_language") String programmingLanguage)
@@ -73,13 +80,18 @@ public class FresherController {
         }
         return new ApiResponse<>(200, "Fresher found", freshers);
     }
+    @PreAuthorize("hasAuthority('USER')")
     @PutMapping("/{fresherId}")
     ApiResponse<Fresher> updateFresher(@PathVariable int fresherId, @RequestBody FresherUpdateRequest request){
-        Fresher updateFresher = fresherService.updateFresher(fresherId, request);
-        ApiResponse<Fresher> apiResponse = new ApiResponse<>(200, "Update fresher successfully",updateFresher);
-        return apiResponse;
+        try {
+            Fresher updateFresher = fresherService.updateFresher(fresherId, request);
+            ApiResponse<Fresher> apiResponse = new ApiResponse<>(200, "Update fresher successfully", updateFresher);
+            return apiResponse;
+        } catch (AppException e){
+            return new ApiResponse<>(e.getErrorCode().getCode(),e.getErrorCode().getMessage(),null);
+        }
     }
-
+    @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping("/{fresherId}")
     ApiResponse<Void> deleteFresher(@PathVariable("fresherId") int fresherId){
         try{
@@ -90,15 +102,27 @@ public class FresherController {
             return new ApiResponse<>(e.getErrorCode().getCode(),e.getErrorCode().getMessage(), null);
         }
     }
+    @PreAuthorize("#fresherId == principal.getFresherId()")
     @GetMapping("/{fresherId}/projects")
-    public ApiResponse<Set<Project>> getFresherProjects(@PathVariable("fresherId") int fresherId){
-        Set<Project> projects = fresherService.getProjectsByFresherId(fresherId);
-        return new ApiResponse<>(200, "Project found",projects);
+    public ApiResponse<List<FresherProject>> getFresherProjects(@PathVariable("fresherId") int fresherId){
+        try {
+            List<FresherProject> projects = fresherService.getProjectsByFresherId(fresherId);
+            return new ApiResponse<>(200, "Project found", projects);
+        } catch (AppException e){
+            return new ApiResponse<>(e.getErrorCode().getCode(),e.getErrorCode().getMessage(), null);
+        }
     }
+    @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
     @GetMapping("/center/{centerId}")
-    public List<Fresher> getFreshersByCenter(@PathVariable("centerId") int centerId){
-        return fresherService.getFreshersByCenterId(centerId);
+    public ApiResponse<List<Fresher>> getFreshersByCenter(@PathVariable("centerId") int centerId){
+        try {
+            List<Fresher> freshers = fresherService.getFreshersByCenterId(centerId);
+            return new ApiResponse<>(200, "Fresher found", freshers);
+        } catch (AppException e){
+            return new ApiResponse<>(e.getErrorCode().getCode(),e.getErrorCode().getMessage(), null);
+        }
     }
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/{fresherId}/center/{centerId}")
     public ApiResponse<String> addFresherToCenter(@PathVariable("fresherId") int fresherId, @PathVariable("centerId") int centerId){
         try {
